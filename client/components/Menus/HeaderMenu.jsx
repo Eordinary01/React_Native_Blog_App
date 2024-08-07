@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
         marginBottom: 2,
         alignSelf: 'center',
         fontSize: 30,
-        color:'black'
+        color:'yellow'
       },
 })
 

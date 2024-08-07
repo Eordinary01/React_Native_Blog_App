@@ -1,15 +1,43 @@
-import React, {useContext, useEffect} from 'react';
-import {View, Text, StyleSheet, SafeAreaView} from 'react-native';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  RefreshControl,
+} from 'react-native';
 import {AuthContext} from '../context/authContext';
 import FooterMenu from '../components/Menus/FooterMenu';
+import {PostContext} from '../context/postContext';
+import PostCard from '../components/PostCard';
 
 const Home = () => {
-  const [state] = useContext(AuthContext);
+  const [posts, getAllPosts] = useContext(PostContext);
+  const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {}, [getAllPosts]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    getAllPosts;
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   return (
     <View style={styles.container}>
-      <Text>{JSON.stringify(state, null, 4)}</Text>
-      <FooterMenu />
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <PostCard posts={posts} />
+        {/* <Text>{JSON.stringify(posts, null, 4)}</Text>/ */}
+      </ScrollView>
+      <View style={{backgroundColor: '#ffffff'}}>
+        <FooterMenu />
+      </View>
     </View>
   );
 };
