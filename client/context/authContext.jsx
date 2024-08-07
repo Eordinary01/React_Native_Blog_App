@@ -27,7 +27,7 @@ const AuthProvider = ({children}) => {
 
   //axios settings
   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  axios.defaults.baseURL = "http://192.168.1.2:8080/api/v1";
+  axios.defaults.baseURL = "https://react-native-blog-app-backend.onrender.com/api/v1";
 
 
   return(
