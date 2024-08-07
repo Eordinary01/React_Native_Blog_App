@@ -7,7 +7,7 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
-import {AuthContext} from '../context/authContext';
+
 import FooterMenu from '../components/Menus/FooterMenu';
 import {PostContext} from '../context/postContext';
 import PostCard from '../components/PostCard';
