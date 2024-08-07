@@ -6,16 +6,13 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import React, { useState,useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import FooterMenu from '../components/Menus/FooterMenu';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { PostContext } from '../context/postContext';
 import axios from 'axios';
 
-const Post = ({navigation}) => {
-
-
-
+const Post = ({ navigation }) => {
   const [posts, setPosts] = useContext(PostContext);
 
   const [title, setTitle] = useState('');
@@ -27,19 +24,23 @@ const Post = ({navigation}) => {
       setLoading(true);
       if (!title) {
         alert("Please add post title");
+        setLoading(false);
+        return;
       }
       if (!description) {
         alert("Please add post description");
+        setLoading(false);
+        return;
       }
 
-      const {data} = await axios.post('/post/create-post', {
+      const { data } = await axios.post('/post/create-post', {
         title, description
       });
       setLoading(false);
       setPosts([...posts, data?.post]);
       alert(data?.message);
       navigation.navigate("Home");
-      
+
     } catch (error) {
       alert(error.response.data.message || error.message);
       setLoading(false);
@@ -68,11 +69,15 @@ const Post = ({navigation}) => {
             value={description}
             onChangeText={(text) => setDescription(text)}
           />
-          <TouchableOpacity style={styles.postBtn} onPress={handlePost}>
-            <Text style={styles.postBtnText}>
-              <FontAwesome5 name="plus-square" size={18} /> Create Post
-            </Text>
-          </TouchableOpacity>
+          {loading ? (
+            <Text style={styles.loadingText}>Creating post...</Text>
+          ) : (
+            <TouchableOpacity style={styles.postBtn} onPress={handlePost}>
+              <Text style={styles.postBtnText}>
+                <FontAwesome5 name="plus-square" size={18} /> Create Post
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
       <View style={styles.footer}>
@@ -142,6 +147,12 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  loadingText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginTop: 20,
   },
   footer: {
     backgroundColor: '#FFFFFF',

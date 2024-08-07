@@ -13,45 +13,34 @@ import axios from 'axios';
 import FooterMenu from '../components/Menus/FooterMenu';
 import {AuthContext} from '../context/authContext';
 import {useNavigation} from '@react-navigation/native';
+import InputBox from '../components/forms/InputBox';
 
 const Account = () => {
   const [state, setState] = useContext(AuthContext);
-  const {user, token} = state;
-  //local state
+  const { user, token } = state;
   const [name, setName] = useState(user?.name);
   const [password, setPassword] = useState(user?.password);
   const [email] = useState(user?.email);
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
 
-  //handle update user data
   const handleUpdate = async () => {
     try {
       setLoading(true);
-      console.log("Sending update request with:", { name, password, email });
-  
       const { data } = await axios.put('/auth/update-user', {
         name,
         password,
         email,
       });
-  
-      // console.log("Received response:", data);
-  
       setLoading(false);
-  
       if (data && data.updatedUser) {
         setState(prevState => ({
           ...prevState,
           user: data.updatedUser
         }));
         alert(data.message || "Profile updated successfully");
-  
-        // Log out the user
         setState(prevState => ({ ...prevState, token: '', user: null }));
-  
-        // Navigate to the login screen
-        navigation.navigate('Login');  // Make sure 'Login' is the correct screen name
+        navigation.navigate('Login');
       } else {
         throw new Error("Invalid response from server");
       }
@@ -64,55 +53,59 @@ const Account = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <View style={{alignItems: 'center'}}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.header}>
           <Image
             source={{
               uri: 'https://cdn.pixabay.com/photo/2020/07/01/12/58/icon-5359553_1280.png',
             }}
-            style={{height: 200, width: 200, borderRadius: 100}}
+            style={styles.profileImage}
           />
+          <Text style={styles.headerText}>Account Settings</Text>
         </View>
-        <Text style={styles.warningtext}>
-          Currently You Can Only Update Your Name And Password*
+        
+        <Text style={styles.warningText}>
+          Currently, you can only update your Name and Password*
         </Text>
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputText}>Name</Text>
-          <TextInput
-            style={styles.inputBox}
+        
+        <View style={styles.formContainer}>
+          <InputBox
+            inputTitle="Name"
             value={name}
-            onChangeText={text => setName(text)}
+            setValue={setName}
+            autoComplete="name"
+            keyboardType="default"
           />
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputText}>Email</Text>
-          <TextInput style={styles.inputBox} value={email} editable={false} />
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputText}>Password</Text>
-          <TextInput
-            style={styles.inputBox}
+          <InputBox
+            inputTitle="Email"
+            value={email}
+            setValue={() => {}}
+            autoComplete="email"
+            keyboardType="email-address"
+          />
+          <InputBox
+            inputTitle="Password"
             value={password}
-            onChangeText={text => setPassword(text)}
+            setValue={setPassword}
             secureTextEntry={true}
+            autoComplete="password"
+            keyboardType="default"
           />
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputText}>Role</Text>
-          <TextInput
-            style={styles.inputBox}
+          <InputBox
+            inputTitle="Role"
             value={state?.user.role}
-            editable={false}
+            setValue={() => {}}
+            keyboardType="default"
           />
         </View>
-        <View style={{alignItems: 'center'}}>
-          <TouchableOpacity style={styles.updateBtn} onPress={handleUpdate}>
-            <Text style={styles.updateBtnText}>
-              {loading ? 'Please Wait' : 'Update Profile'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+
+        <TouchableOpacity style={styles.updateBtn} onPress={handleUpdate}>
+          <Text style={styles.updateBtnText}>
+            {loading ? 'Please Wait' : 'Update Profile'}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
+      
       <View style={styles.footer}>
         <FooterMenu />
       </View>
@@ -123,47 +116,55 @@ const Account = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 10,
-    justifyContent: 'space-between',
-    marginTop: 40,
+    backgroundColor: '#FFF',
   },
-  warningtext: {
-    color: 'red',
-    fontSize: 13,
-    textAlign: 'center',
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
-  inputContainer: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'center',
+  header: {
     alignItems: 'center',
+    backgroundColor: '#FFD700',
+    paddingVertical: 20,
   },
-  inputText: {
+  profileImage: {
+    height: 120,
+    width: 120,
+    borderRadius: 60,
+    borderWidth: 3,
+    borderColor: '#000',
+  },
+  headerText: {
+    fontSize: 24,
     fontWeight: 'bold',
-    width: 70,
-    color: 'gray',
+    color: '#000',
+    marginTop: 10,
   },
-  inputBox: {
-    width: 250,
-    backgroundColor: '#ffffff',
-    marginLeft: 10,
-    fontSize: 16,
-    paddingLeft: 20,
-    borderRadius: 5,
+  warningText: {
+    color: '#FF0000',
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 10,
+    fontStyle: 'italic',
+  },
+  formContainer: {
+    paddingHorizontal: 20,
   },
   updateBtn: {
-    backgroundColor: 'black',
-    color: 'white',
-    height: 40,
-    width: 250,
-    borderRadius: 10,
-    marginTop: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#000',
+    paddingVertical: 15,
+    borderRadius: 8,
+    marginHorizontal: 20,
+    marginTop: 20,
   },
   updateBtnText: {
-    color: '#ffffff',
-    fontSize: 16,
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  footer: {
+    backgroundColor: '#FFD700',
   },
 });
 
