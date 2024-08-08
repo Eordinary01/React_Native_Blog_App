@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, Dimensions} from 'react-native';
 import React from 'react';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
@@ -6,39 +6,36 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 const FooterMenu = () => {
   const navigation = useNavigation();
   const route = useRoute();
+
+  const menuItems = [
+    { name: 'Home', icon: 'home' },
+    { name: 'Post', icon: 'plus-square' },
+    { name: 'Account', icon: 'user' },
+    { name: 'Myposts', icon: 'list' },
+  ];
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Home')}>
-        <FontAwesome5
-          name="home"
-          style={[styles.iconStyle, route.name === "Home" && styles.activeIcon]}
-        />
-        <Text style={styles.menuText}>Home</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Post')}>
-        <FontAwesome5
-          name="plus-square"
-          style={[styles.iconStyle, route.name === 'Post' && styles.activeIcon]}
-        />
-        <Text style={styles.menuText}>Post</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Account')}>
-        <FontAwesome5
-          name="user"
-          style={[styles.iconStyle, route.name === 'Account' && styles.activeIcon]}
-        />
-        <Text style={styles.menuText}>Account</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Myposts')}>
-        <FontAwesome5
-          name="list"
-          style={[styles.iconStyle, route.name === 'Myposts' && styles.activeIcon]}
-        />
-        <Text style={styles.menuText}>My Posts</Text>
-      </TouchableOpacity>
+      {menuItems.map((item) => (
+        <TouchableOpacity
+          key={item.name}
+          style={styles.menuItem}
+          onPress={() => navigation.navigate(item.name)}
+        >
+          <FontAwesome5
+            name={item.icon}
+            style={[styles.iconStyle, route.name === item.name && styles.activeIcon]}
+          />
+          <Text style={[styles.menuText, route.name === item.name && styles.activeText]}>
+            {item.name}
+          </Text>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
+
+const {width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -53,12 +50,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    height: 60,
+    width: width,
   },
   menuItem: {
     alignItems: 'center',
+    flex: 1,
   },
   iconStyle: {
-    fontSize: 20,
+    fontSize: 24,
     color: "#333",
     marginBottom: 3,
   },
@@ -68,6 +68,9 @@ const styles = StyleSheet.create({
   menuText: {
     fontSize: 12,
     color: '#333',
+  },
+  activeText: {
+    color: "orange",
   },
 });
 

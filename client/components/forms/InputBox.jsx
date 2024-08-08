@@ -11,7 +11,7 @@ const InputBox = ({
 }) => {
   return (
     <View>
-      <Text>{inputTitle}</Text>
+       <Text style={[styles.inputTitle, styles.titleStyle]}>{inputTitle}</Text>
       <TextInput
         style={styles.inputBox}
         autoCorrect={false}
@@ -29,11 +29,16 @@ const styles = StyleSheet.create({
   inputBox: {
     height: 40,
     marginBottom: 20,
-    backgroundColor: "#ffffff",
+    backgroundColor: "gray",
     borderRadius: 10,
     marginTop: 10,
     paddingLeft: 10,
     color: "black",
+  },
+  inputTitle: {
+    fontSize: 16,
+    color: 'black', // Default color
+    marginBottom: 5,
   },
 });
 

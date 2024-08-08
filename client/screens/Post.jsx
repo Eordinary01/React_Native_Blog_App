@@ -13,7 +13,7 @@ import { PostContext } from '../context/postContext';
 import axios from 'axios';
 
 const Post = ({ navigation }) => {
-  const [posts, setPosts] = useContext(PostContext);
+  const { posts, setPosts } = useContext(PostContext);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

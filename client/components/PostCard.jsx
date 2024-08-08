@@ -13,20 +13,19 @@ import {useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import EditModal from './EditModal';
 
-const PostCard = ({posts, myPostScreen}) => {
+const PostCard = ({post, myPostScreen}) => {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [post, setPost] = useState({});
   const navigation = useNavigation();
 
-  const [expandedId, setExpandedId] = useState(null);
+  const [expanded, setExpanded] = useState(false);
 
-  const toggleExpand = id => {
-    setExpandedId(expandedId === id ? null : id);
+  const toggleExpand = () => {
+    setExpanded(!expanded);
   };
 
-  const handleDeleteRequest = id => {
-    Alert.alert('Attention!', 'Are you Sure You Want To Delete This Post?..', [
+  const handleDeleteRequest = () => {
+    Alert.alert('Attention!', 'Are you Sure You Want To Delete This Post?', [
       {
         text: 'Cancel',
         onPress: () => {
@@ -35,15 +34,14 @@ const PostCard = ({posts, myPostScreen}) => {
       },
       {
         text: 'Delete',
-        onPress: () => hanadleDeletePost(id),
+        onPress: () => handleDeletePost(post._id),
       },
     ]);
   };
 
-  const hanadleDeletePost = async id => {
+  const handleDeletePost = async id => {
     try {
       setLoading(true);
-
       const {data} = await axios.delete(`/post/delete-post/${id}`);
       setLoading(false);
       Alert.alert(data?.message);
@@ -51,13 +49,46 @@ const PostCard = ({posts, myPostScreen}) => {
     } catch (error) {
       setLoading(false);
       console.log(error);
-      Alert.alert(error);
+      Alert.alert(error.response?.data?.message || 'An error occurred');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Total Posts: {posts?.length}</Text>
+    <TouchableOpacity onPress={toggleExpand}>
+      <Animated.View style={[styles.card, expanded && styles.expandedCard]}>
+        {myPostScreen && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={{marginHorizontal: 15}}
+              onPress={() => setModalVisible(true)}>
+              <FontAwesome5 name="pen" size={18} color="darkblue" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDeleteRequest}>
+              <FontAwesome5 name="trash" size={18} color="red" />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        <View style={styles.titleContainer}>
+          <FontAwesome5 name="star" size={16} color="#FFD700" />
+          <Text style={styles.title}>{post?.title}</Text>
+        </View>
+        {expanded && <Text style={styles.desc}>{post?.description}</Text>}
+        <View style={styles.footer}>
+          {post?.postedBy?.name && (
+            <View style={styles.footerItem}>
+              <FontAwesome5 name="user" size={14} color="#FFD700" />
+              <Text style={styles.footerText}>{post?.postedBy?.name}</Text>
+            </View>
+          )}
+          <View style={styles.footerItem}>
+            <FontAwesome5 name="clock" size={14} color="#FFD700" />
+            <Text style={styles.footerText}>
+              {moment(post?.createdAt).format('DD MMM YYYY')}
+            </Text>
+          </View>
+        </View>
+      </Animated.View>
       {myPostScreen && (
         <EditModal
           modalVisible={modalVisible}
@@ -65,79 +96,13 @@ const PostCard = ({posts, myPostScreen}) => {
           post={post}
         />
       )}
-      {posts?.map((post, i) => (
-        <TouchableOpacity key={i} onPress={() => toggleExpand(post._id)}>
-          <Animated.View
-            style={[
-              styles.card,
-              expandedId === post._id && styles.expandedCard,
-            ]}>
-            {myPostScreen && (
-              <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-                <Text style={{marginHorizontal: 17}}>
-                  <FontAwesome5
-                    name="pen"
-                    size={18}
-                    color="darkblue"
-                    onPress={() => {
-                      setPost(post), setModalVisible(true);
-                    }}
-                  />
-                </Text>
-                <Text>
-                  <FontAwesome5
-                    name="trash"
-                    size={18}
-                    color="red"
-                    onPress={() => handleDeleteRequest(post?._id)}
-                  />
-                </Text>
-              </View>
-            )}
-
-            <View style={styles.titleContainer}>
-              <FontAwesome5 name="star" size={16} color="#FFD700" />
-              <Text style={styles.title}>{post?.title}</Text>
-            </View>
-            {expandedId === post._id && (
-              <Text style={styles.desc}>{post?.description}</Text>
-            )}
-            <View style={styles.footer}>
-              {post?.postedBy?.name && (
-                <View style={styles.footerItem}>
-                  <FontAwesome5 name="user" size={14} color="#FFD700" />
-                  <Text style={styles.footerText}>{post?.postedBy?.name}</Text>
-                </View>
-              )}
-              <View style={styles.footerItem}>
-                <FontAwesome5 name="clock" size={14} color="#FFD700" />
-                <Text style={styles.footerText}>
-                  {moment(post?.createdAt).format('DD MMM YYYY')}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.expandIcon}></View>
-          </Animated.View>
-        </TouchableOpacity>
-      ))}
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-    backgroundColor: '#FFFAF0', // Light yellow background
-  },
-  heading: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#00ff00',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
   card: {
-    backgroundColor: '#FFFFE0', // Light yellow for cards
+    backgroundColor: '#FFFFE0',
     borderRadius: 15,
     padding: 20,
     marginBottom: 15,
@@ -147,10 +112,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     borderWidth: 1,
-    borderColor: 'black', // Gold border
+    borderColor: 'black',
   },
   expandedCard: {
-    backgroundColor: '#FFF8DC', // Darker yellow when expanded
+    backgroundColor: '#FFF8DC',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
   },
   titleContainer: {
     flexDirection: 'row',
@@ -160,12 +129,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#B8860B', // Dark goldenrod color for title
+    color: '#B8860B',
     marginLeft: 10,
   },
   desc: {
     fontSize: 16,
-    color: '#8B4513', // Saddle brown color for description
+    color: '#8B4513',
     marginTop: 10,
     marginBottom: 15,
     lineHeight: 22,
@@ -174,7 +143,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: 'white', // Gold border
+    borderTopColor: 'white',
     paddingTop: 10,
   },
   footerItem: {
@@ -184,12 +153,7 @@ const styles = StyleSheet.create({
   footerText: {
     marginLeft: 5,
     fontSize: 14,
-    color: 'black', // Goldenrod color for footer text
-  },
-  expandIcon: {
-    position: 'absolute',
-    right: 15,
-    bottom: 15,
+    color: 'black',
   },
 });
 

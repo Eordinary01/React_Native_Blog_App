@@ -1,43 +1,53 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, { useContext, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
-  ScrollView,
+  FlatList,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 
 import FooterMenu from '../components/Menus/FooterMenu';
-import {PostContext} from '../context/postContext';
+import { PostContext } from '../context/postContext';
 import PostCard from '../components/PostCard';
 
 const Home = () => {
-  const [posts, getAllPosts] = useContext(PostContext);
-  const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {}, [getAllPosts]);
+  const { posts, getAllPosts, loading } = useContext(PostContext);
 
   const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    getAllPosts;
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
+    getAllPosts();
+  }, [getAllPosts]);
+
+  const renderItem = ({ item }) => <PostCard post={item} />;
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }>
-        <PostCard posts={posts} />
-        {/* <Text>{JSON.stringify(posts, null, 4)}</Text>/ */}
-      </ScrollView>
-      <View style={{backgroundColor: '#ffffff'}}>
-        <FooterMenu />
-      </View>
+      <Text style={styles.totalPosts}>Total Posts: {posts ? posts.length : 0}</Text>
+      {posts && posts.length > 0 ? (
+        <FlatList
+          data={posts}
+          renderItem={renderItem}
+          keyExtractor={(item) => item._id.toString()}
+          contentContainerStyle={styles.listContainer}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+          }
+        />
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No posts available</Text>
+        </View>
+      )}
+      <FooterMenu />
     </View>
   );
 };
@@ -46,8 +56,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f0f0',
-    margin: 10,
-    justifyContent: 'space-between',
+  },
+  listContainer: {
+    padding: 10,
+    paddingBottom: 80, // Add padding to account for the footer
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    color: '#888',
+  },
+  totalPosts: {
+    padding: 10,
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: '#4CAF50',
+    backgroundColor: '#FFFAF0',
+    textAlign:'center',
+    
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

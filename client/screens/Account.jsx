@@ -82,6 +82,7 @@ const Account = () => {
             setValue={() => {}}
             autoComplete="email"
             keyboardType="email-address"
+            editable={false}
           />
           <InputBox
             inputTitle="Password"
@@ -96,6 +97,7 @@ const Account = () => {
             value={state?.user.role}
             setValue={() => {}}
             keyboardType="default"
+            editable={false}
           />
         </View>
 
